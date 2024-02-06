@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
+
 Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ Future<void> main() async {
     ),
   );
 }
+
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -27,7 +29,6 @@ class MyHttpOverrides extends HttpOverrides {
           (X509Certificate cert, String host, int port) => true;
   }
 }
-
 
 class TakePictureScreen extends StatefulWidget {
   const TakePictureScreen({
@@ -38,6 +39,7 @@ class TakePictureScreen extends StatefulWidget {
   @override
   TakePictureScreenState createState() => TakePictureScreenState();
 }
+
 class TakePictureScreenState extends State<TakePictureScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
@@ -50,15 +52,17 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     );
     _initializeControllerFuture = _controller.initialize();
   }
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Take a picture')),
+      appBar: AppBar(title: const Text('Chụp ảnh quần áo')),
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
@@ -102,6 +106,8 @@ class DisplayPictureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print(imagePath);
+    final size = MediaQuery.of(context).size;
+    final aspectRatio = size.width / size.height;
     return Scaffold(
       appBar: AppBar(title: const Text('Display the Picture')),
       body: FutureBuilder(
@@ -113,8 +119,25 @@ class DisplayPictureScreen extends StatelessWidget {
             } else {
               final Url = snapshot.data as String?;
               final imageUrl = snapshot.data as String?;
-              if (imageUrl != null ) {
-                return Image.network(imageUrl);
+              if (imageUrl != null) {
+                return Center(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        /* To do: hiển thị quần áo với scale bằng với bố cục layout là 3 hay 4 items. */
+                        width: size.width / 1.5,
+                        height: size.height / 1.5,
+                        child: Image.network(imageUrl),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          await saveImageToDevice(imageUrl);
+                        },
+                        child: Text('Save Image'),
+                      ),
+                    ],
+                  ),
+                );
               } else {
                 return const Text('Invalid data received');
               }
@@ -126,8 +149,9 @@ class DisplayPictureScreen extends StatelessWidget {
       ),
     );
   }
-  Future<String?>uploadImage(File imageFile)async{
-    var request=http.MultipartRequest(
+
+  Future<String?> uploadImage(File imageFile) async {
+    var request = http.MultipartRequest(
       'POST',
       Uri.parse('https://thienanbui0901.pythonanywhere.com/upload'),
     );
@@ -135,10 +159,10 @@ class DisplayPictureScreen extends StatelessWidget {
       'file',
       imageFile.readAsBytes().asStream(),
       imageFile.lengthSync(),
-      filename:basename(imagePath),
+      filename: basename(imagePath),
     ));
-    try{
-      var response=await request.send();
+    try {
+      var response = await request.send();
       /* Currently, Server does not return status Code, so skip now.
       It's always success.
       if(response.statusCode==200){
@@ -150,10 +174,24 @@ class DisplayPictureScreen extends StatelessWidget {
         return null;
       }
       */
-      return 'https://thienanbui0901.pythonanywhere.com/processed_images/processed_'+basename(imagePath);
-    }catch(e){
+      return 'https://thienanbui0901.pythonanywhere.com/processed_images/processed_' +
+          basename(imagePath);
+    } catch (e) {
       print('Error uploading image:$e');
       return null;
     }
   }
+}
+
+Future<void> saveImageToDevice(String imageUrl) async {
+  final response = await http.get(Uri.parse(imageUrl));
+  final bytes = response.bodyBytes;
+  print('saveImageToDevie');
+
+  //final directory = await getExternalStorageDirectory();
+  //final imagePath = '${directory!.path}/image.png';
+  //final imageFile = File(imagePath);
+
+  //await imageFile.writeAsBytes(bytes);
+  //print('Image saved at: $imagePath');
 }
