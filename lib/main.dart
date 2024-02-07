@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
+
 
 Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
@@ -97,21 +97,26 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     );
   }
 }
-class DisplayPictureScreen extends StatelessWidget {
+class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
   const DisplayPictureScreen({
     Key? key,
     required this.imagePath,
   }) : super(key: key);
+
+  @override
+  DisplayPictureScreenState createState() => DisplayPictureScreenState();
+}
+class DisplayPictureScreenState extends State<DisplayPictureScreen> {
+  bool _isChecked = false; // Trạng thái ban đầu của checkbox
   @override
   Widget build(BuildContext context) {
-    print(imagePath);
     final size = MediaQuery.of(context).size;
     final aspectRatio = size.width / size.height;
     return Scaffold(
       appBar: AppBar(title: const Text('Display the Picture')),
       body: FutureBuilder(
-        future: uploadImage(File(imagePath)),
+        future: uploadImage(File(widget.imagePath)),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasError) {
@@ -134,6 +139,14 @@ class DisplayPictureScreen extends StatelessWidget {
                           await saveImageToDevice(imageUrl);
                         },
                         child: Text('Save Image'),
+                      ),
+                      Checkbox(
+                        value: _isChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            _isChecked = value ?? false;
+                          });
+                        },
                       ),
                     ],
                   ),
@@ -159,7 +172,7 @@ class DisplayPictureScreen extends StatelessWidget {
       'file',
       imageFile.readAsBytes().asStream(),
       imageFile.lengthSync(),
-      filename: basename(imagePath),
+      filename: basename(widget.imagePath),
     ));
     try {
       var response = await request.send();
@@ -175,7 +188,7 @@ class DisplayPictureScreen extends StatelessWidget {
       }
       */
       return 'https://thienanbui0901.pythonanywhere.com/processed_images/processed_' +
-          basename(imagePath);
+          basename(widget.imagePath);
     } catch (e) {
       print('Error uploading image:$e');
       return null;
