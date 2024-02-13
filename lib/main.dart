@@ -1,31 +1,20 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_swiper_view/flutter_swiper_view.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 String ImageRootPath = '/storage/emulated/0/HNMG/Images';
 String AoImagePath = '/storage/emulated/0/HNMG/Images/Ao';
 String QuanImagePath = '/storage/emulated/0/HNMG/Images/Quan';
 String PKImagePath = '/storage/emulated/0/HNMG/Images/PK';
 
-Future<void> main() async {
-  HttpOverrides.global = MyHttpOverrides();
-  WidgetsFlutterBinding.ensureInitialized();
-  final cameras = await availableCameras();
-  createAppFolder();
-  final firstCamera = cameras.first;
-  runApp(
-    MaterialApp(
-      theme: ThemeData.dark(),
-      home: TakePictureScreen(
-        camera: firstCamera,
-      ),
-    ),
-  );
-}
+late CameraDescription firstCamera;
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -34,6 +23,155 @@ class MyHttpOverrides extends HttpOverrides {
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
   }
+}
+
+void createAppFolder() async {
+  String appFolderPath = '/storage/emulated/0';
+  String yourFolderName =
+      "HNMG/Images/Ao"; // Thay thế bằng tên thư mục bạn muốn tạo
+
+  String folderPath = '$appFolderPath/$yourFolderName';
+  print(folderPath);
+
+  // Kiểm tra xem thư mục đã tồn tại hay chưa
+  if (!await Directory(folderPath).exists()) {
+    // Nếu chưa tồn tại, hãy tạo mới
+    await Directory(folderPath).create(recursive: true);
+    print('App Folder created: $folderPath');
+  } else {
+    print('App Folder already exists: $folderPath');
+  }
+
+  yourFolderName = "HNMG/Images/Quan"; // Thay thế bằng tên thư mục bạn muốn tạo
+
+  folderPath = '$appFolderPath/$yourFolderName';
+  print(folderPath);
+
+  // Kiểm tra xem thư mục đã tồn tại hay chưa
+  if (!await Directory(folderPath).exists()) {
+    // Nếu chưa tồn tại, hãy tạo mới
+    await Directory(folderPath).create(recursive: true);
+    print('App Folder created: $folderPath');
+  } else {
+    print('App Folder already exists: $folderPath');
+  }
+
+  yourFolderName = "HNMG/Images/PK"; // Thay thế bằng tên thư mục bạn muốn tạo
+
+  folderPath = '$appFolderPath/$yourFolderName';
+  print(folderPath);
+
+  // Kiểm tra xem thư mục đã tồn tại hay chưa
+  if (!await Directory(folderPath).exists()) {
+    // Nếu chưa tồn tại, hãy tạo mới
+    await Directory(folderPath).create(recursive: true);
+    print('App Folder created: $folderPath');
+  } else {
+    print('App Folder already exists: $folderPath');
+  }
+
+  // Bạn có thể sử dụng đường dẫn `folderPath` để lưu trữ dữ liệu của ứng dụng.
+}
+
+class MyHomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Đầm này xinh quáaa'),
+      ),
+      body: Center(
+        child: Text('Your Content Here'),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        elevation: 20, // Chiều sâu
+        shape: CircularNotchedRectangle(), // Hình dạng đặc biệt
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.collections, size: 30),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Display()),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.photo_camera, size: 30),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TakePictureScreen(
+                      camera: firstCamera,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CaptureImagePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Chụp hình'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Trở về màn hình trước đó
+          },
+        ),
+      ),
+      body: Center(
+        child: Text('This is Capture Image Page'),
+      ),
+    );
+  }
+}
+
+class DisplayImagesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Hiển thị ảnh'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Trở về màn hình trước đó
+          },
+        ),
+      ),
+      body: Center(
+        child: Text('This is Display Images Page'),
+      ),
+    );
+  }
+}
+
+Future<void> main() async {
+  HttpOverrides.global = MyHttpOverrides();
+  WidgetsFlutterBinding.ensureInitialized();
+  final cameras = await availableCameras();
+  createAppFolder();
+  firstCamera = cameras.first;
+  print(firstCamera);
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.light(),
+      home: MyHomePage(),
+    ),
+  );
 }
 
 class TakePictureScreen extends StatefulWidget {
@@ -98,7 +236,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             print(e);
           }
         },
-        child: const Icon(Icons.camera),
+        child: const Icon(Icons.add_a_photo),
       ),
     );
   }
@@ -120,25 +258,38 @@ class DisplayPictureScreenState extends State<DisplayPictureScreen> {
   bool isQuan = false;
   bool isPhuKien = false;
   String _imageUrl = '';
+  bool _triggerReBuild = false;
+  var image = Image(
+    image: NetworkImage(
+        'https://example.com/your_image.png'), // URL của ảnh từ internet
+    width: 200, // Chiều rộng (nếu cần)
+    height: 100, // Chiều cao (nếu cần)
+    fit: BoxFit.cover, // Cách ảnh sẽ được hiển thị (nếu cần)
+  );
   @override
   void initState() {
     super.initState();
     _processImage();
+    print('đã xử lý xong hình ảnhhhhhhhhhhhhhhhhhhhh');
   }
 
   Future<void> _processImage() async {
     uploadImageNoAsync(File(widget.imagePath));
     await Future.delayed(Duration(seconds: 2));
+    _imageUrl =
+        'https://thienanbui0901.pythonanywhere.com/processed_images/processed_' +
+            basename(widget.imagePath);
+    //await Future.delayed(Duration(seconds: 2));
     setState(() {
-      _imageUrl =
-          'https://thienanbui0901.pythonanywhere.com/processed_images/processed_' +
-              basename(widget.imagePath);
+      _triggerReBuild = true;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_imageUrl.isEmpty) {
+    print('build lạiiiiiiiiiiiiiiiiiiiiiiiiii');
+
+    if (_triggerReBuild == false) {
       return Scaffold(
         appBar: AppBar(title: const Text('Phân loại quần áo')),
         body: Center(
@@ -161,7 +312,26 @@ class DisplayPictureScreenState extends State<DisplayPictureScreen> {
               ),
               ElevatedButton(
                 onPressed: () async {
+                  // Gọi hàm lưu hình ảnh
                   await saveImageToDevice(_imageUrl);
+                  // Hiển thị pop-up thông báo
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Thông báo'),
+                        content: Text('Hình ảnh đã được lưu.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Đóng'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 child: Text('Lưu thông tin'),
               ),
@@ -227,7 +397,6 @@ class DisplayPictureScreenState extends State<DisplayPictureScreen> {
       filename: basename(widget.imagePath),
     ));
     request.send();
-    //Future.delayed(const Duration(seconds: 10));
   }
 
   Future<String?> uploadImage(File imageFile) async {
@@ -265,49 +434,134 @@ class DisplayPictureScreenState extends State<DisplayPictureScreen> {
       return null;
     }
   }
+
   Future<void> saveImageToDevice(String imageUrl) async {
     final response = await http.get(Uri.parse(imageUrl));
     final bytes = response.bodyBytes;
     var imagePath;
-    if (isAo == true)
-    {
+    if (isAo == true) {
       imagePath = AoImagePath;
+    } else if (isQuan == true) {
+      imagePath = QuanImagePath;
+    } else {
+      imagePath = PKImagePath;
     }
-    else if (isQuan == true)
-      {
-        imagePath = QuanImagePath;
-      }
-    else
-      {
-        imagePath = PKImagePath;
-      }
     imagePath = '$imagePath/${basename(imageUrl)}';
     final imageFile = File(imagePath);
 
     await imageFile.writeAsBytes(bytes);
+
     print('Image saved at: $imagePath');
   }
 }
 
+//=========================================================================================
+var Clothes = [];
 
+var Ao = [];
+var Quan = [];
+var PK = [];
 
-void createAppFolder() async {
-  String appFolderPath = '/storage/emulated/0';
-  String yourFolderName =
-      "HNMG/Images"; // Thay thế bằng tên thư mục bạn muốn tạo
+class Display extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    List<String> aos = listFilesInDirectory(AoImagePath);
+    List<String> quans = listFilesInDirectory(QuanImagePath);
+    List<String> PKs = listFilesInDirectory(PKImagePath);
+    if (Clothes.isEmpty == false) {
+      Clothes.clear();
+    }
+    Clothes.add(aos);
+    Clothes.add(quans);
+    Clothes.add(PKs);
 
-  String folderPath = '$appFolderPath/$yourFolderName';
-  print(folderPath);
-
-  
-  // Kiểm tra xem thư mục đã tồn tại hay chưa
-  if (!await Directory(folderPath).exists()) {
-    // Nếu chưa tồn tại, hãy tạo mới
-    await Directory(folderPath).create(recursive: true);
-    print('App Folder created: $folderPath');
-  } else {
-    print('App Folder already exists: $folderPath');
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Hôm nay mặc gì ?'),
+      ),
+      body: ListView.builder(
+        padding: EdgeInsets.symmetric(vertical: 1.0),
+        itemCount: Clothes.length, // Số lượng hàng bạn muốn hiển thị
+        addAutomaticKeepAlives: true,
+        itemBuilder: (BuildContext context, int rowIndex) {
+          return Column(
+            children: [
+              _buildCarousel(context, rowIndex),
+              SizedBox(height: 2.0), // Khoảng cách giữa các hàng
+            ],
+          );
+        },
+      ),
+      backgroundColor: Colors.white,
+    );
   }
 
-  // Bạn có thể sử dụng đường dẫn `folderPath` để lưu trữ dữ liệu của ứng dụng.
+  Widget _buildCarousel(BuildContext context, int carouselIndex) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        SizedBox(
+          // you may want to use an aspect ratio here for tablet support
+          height: 200.0,
+          child: Swiper(
+            itemBuilder: (context, index) {
+              return _buildCarouselItem(context, carouselIndex, index);
+            },
+            itemCount: Clothes[carouselIndex].length,
+            pagination: SwiperCustomPagination(
+              builder: (BuildContext context, SwiperPluginConfig config) {
+                // Hiển thị số hiện tại và tổng số mục
+                return Container(
+                  alignment: Alignment.centerRight,
+                  margin: EdgeInsets.all(10.0),
+                  padding: EdgeInsets.only(
+                      top: 10.0), // Di chuyển số xuống dưới 10 pixels
+                  child: Text(
+                    "${config.activeIndex + 1}/${config.itemCount}",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 16, // Đặt kích thước của số
+                      fontWeight: FontWeight.bold, // In đậm chữ
+                    ),
+                  ),
+                );
+              },
+            ),
+            //control: const SwiperControl(color: Colors.black),
+            itemWidth: 300.0,
+            itemHeight: 400.0,
+            layout: SwiperLayout.DEFAULT,
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildCarouselItem(
+      BuildContext context, int carouselIndex, int itemIndex) {
+    print('Row thứ ? $carouselIndex');
+    print('item trong cột thứ = $itemIndex');
+    String imagePath = Clothes[carouselIndex][itemIndex];
+    File imageFile = File(imagePath);
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 1.0),
+      child: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: FileImage(imageFile),
+            fit: BoxFit.scaleDown,
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<String> listFilesInDirectory(String directoryPath) {
+    Directory directory = Directory(directoryPath);
+    List<String> fileList = [];
+    if (directory.existsSync()) {
+      fileList = directory.listSync().map((file) => file.path).toList();
+    }
+    return fileList;
+  }
 }
