@@ -8,6 +8,7 @@ import 'package:path/path.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_swiper_view/flutter_swiper_view.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 
 String ImageRootPath = '/storage/emulated/0/HNMG/Images';
 String AoImagePath = '/storage/emulated/0/HNMG/Images/Ao';
@@ -78,11 +79,9 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Đầm này xinh quáaa'),
+        title: Text('Happy Valentine 2024'),
       ),
-      body: Center(
-        child: Text('Your Content Here'),
-      ),
+      body: ExamplePage(),
       bottomNavigationBar: BottomAppBar(
         elevation: 20, // Chiều sâu
         shape: CircularNotchedRectangle(), // Hình dạng đặc biệt
@@ -206,7 +205,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chụp ảnh quần áo')),
+      appBar: AppBar(title: const Text('Ùi đầm này xinh quá')),
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
@@ -565,3 +564,126 @@ class Display extends StatelessWidget {
     return fileList;
   }
 }
+
+//===========Vòng quay may mắn===================
+class ExamplePage extends StatefulWidget {
+  @override
+  _ExamplePageState createState() => _ExamplePageState();
+}
+
+class _ExamplePageState extends State<ExamplePage> {
+  StreamController<int> selected = StreamController<int>();
+
+  int selectedValue = -1;
+  bool gameStarted = false;
+  bool gameFinished = false;
+
+  @override
+  void dispose() {
+    selected.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <String>[
+      'Đầm xinh',
+      '5000 vnđ ( tiền mới )',
+      'Đồng hồ kim',
+      'Máy lọc không khí',
+      '100.000 vnđ ( tiền mới )',
+      'Tiết kiệm đi',
+      '500.000 vnđ ( tiền mới )',
+      'Chuông báo cháy'
+    ];
+
+    final colors = <Color>[
+      Colors.red,
+      Colors.orange,
+      Colors.green,
+      Colors.indigo,
+      Colors.purple,
+      Colors.pink,
+      Colors.teal,
+      Colors.brown
+    ];
+
+    return Scaffold(
+      body: GestureDetector(
+        onTap: () {
+          if (!gameStarted) {
+            // Hiển thị pop-up thông báo "Chơi"
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text("Điều khoản"),
+                  content: Text("Tôi cam kết có chơi có chịu."),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          gameStarted = true;
+                        });
+                      },
+                      child: Text("Đồng ý"),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+          if (!gameFinished && gameStarted) {
+            setState(() {
+              selectedValue = Fortune.randomInt(0, items.length);
+              selected.add(selectedValue);
+              gameFinished = true; // Trò chơi kết thúc
+            });
+
+            // Hiển thị thông báo sau khi quay kết thúc
+            Future.delayed(Duration(seconds: 8), () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Em tự quay đó nhaaa !!!"),
+                    content: Text("Chúc mừng Be trúng: ${items[selectedValue]}!"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text("OK"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            });
+          }
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: FortuneWheel(
+                selected: selected.stream,
+                items: [
+                  for (int i = 0; i < items.length; i++)
+                    FortuneItem(
+                      child: Text(
+                        items[i],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      style: FortuneItemStyle(color: colors[i]),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
