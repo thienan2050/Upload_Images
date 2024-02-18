@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_swiper_view/flutter_swiper_view.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
+
+String RootApp = '/storage/emulated/0/HNMG';
+var folders2Created = ['/Images/Ao', '/Images/Quan', '/Images/PK'];
 
 String ImageRootPath = '/storage/emulated/0/HNMG/Images';
 String AoImagePath = '/storage/emulated/0/HNMG/Images/Ao';
@@ -27,54 +27,72 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 void createAppFolder() async {
-  String appFolderPath = '/storage/emulated/0';
   String yourFolderName =
       "HNMG/Images/Ao"; // Thay thế bằng tên thư mục bạn muốn tạo
 
-  String folderPath = '$appFolderPath/$yourFolderName';
-  print(folderPath);
+  String folderPath;
 
-  // Kiểm tra xem thư mục đã tồn tại hay chưa
-  if (!await Directory(folderPath).exists()) {
-    // Nếu chưa tồn tại, hãy tạo mới
-    await Directory(folderPath).create(recursive: true);
-    print('App Folder created: $folderPath');
-  } else {
-    print('App Folder already exists: $folderPath');
+  for (int i = 0; i < folders2Created.length; i++) {
+    folderPath = RootApp + folders2Created[i];
+    print(folderPath);
+    if (!await Directory(folderPath).exists()) {
+      // Nếu chưa tồn tại, hãy tạo mới
+      await Directory(folderPath).create(recursive: true);
+      print('App Folder created: $folderPath');
+    } else {
+      print('App Folder already exists: $folderPath');
+    }
   }
-
-  yourFolderName = "HNMG/Images/Quan"; // Thay thế bằng tên thư mục bạn muốn tạo
-
-  folderPath = '$appFolderPath/$yourFolderName';
-  print(folderPath);
-
-  // Kiểm tra xem thư mục đã tồn tại hay chưa
-  if (!await Directory(folderPath).exists()) {
-    // Nếu chưa tồn tại, hãy tạo mới
-    await Directory(folderPath).create(recursive: true);
-    print('App Folder created: $folderPath');
-  } else {
-    print('App Folder already exists: $folderPath');
-  }
-
-  yourFolderName = "HNMG/Images/PK"; // Thay thế bằng tên thư mục bạn muốn tạo
-
-  folderPath = '$appFolderPath/$yourFolderName';
-  print(folderPath);
-
-  // Kiểm tra xem thư mục đã tồn tại hay chưa
-  if (!await Directory(folderPath).exists()) {
-    // Nếu chưa tồn tại, hãy tạo mới
-    await Directory(folderPath).create(recursive: true);
-    print('App Folder created: $folderPath');
-  } else {
-    print('App Folder already exists: $folderPath');
-  }
-
-  // Bạn có thể sử dụng đường dẫn `folderPath` để lưu trữ dữ liệu của ứng dụng.
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(BuildContext context, int index) {
+
+    switch(index)
+    {
+      case 0:
+        {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Display()),
+          );
+        }
+        break;
+      case 1:
+        {
+
+        }
+        break;
+      case 2:
+        {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TakePictureScreen(
+                camera: firstCamera,
+              ),
+            ),
+          );
+        }
+        break;
+      case 3:
+        {
+
+        }
+        break;
+      default: break;
+    }
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,36 +100,31 @@ class MyHomePage extends StatelessWidget {
         title: Text('Happy Valentine 2024'),
       ),
       body: ExamplePage(),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 20, // Chiều sâu
-        shape: CircularNotchedRectangle(), // Hình dạng đặc biệt
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.collections, size: 30),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Display()),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.photo_camera, size: 30),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TakePictureScreen(
-                      camera: firstCamera,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white70, // Màu nền của BottomNavigationBar
+        selectedItemColor: Colors.yellow[800], // Màu của mục được chọn
+        unselectedItemColor: Colors.grey[900], // Màu của các mục không được chọn
+        currentIndex: _selectedIndex, // Index của mục được chọn
+        onTap: (index) => _onItemTapped(context, index), // Hàm gọi khi mục được chọn
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.image_outlined),
+            label: 'Clothes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event_note_outlined),
+            label: 'Note',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt_outlined),
+            label: 'Tạo mới',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }
@@ -157,22 +170,6 @@ class DisplayImagesPage extends StatelessWidget {
   }
 }
 
-Future<void> main() async {
-  HttpOverrides.global = MyHttpOverrides();
-  WidgetsFlutterBinding.ensureInitialized();
-  final cameras = await availableCameras();
-  createAppFolder();
-  firstCamera = cameras.first;
-  print(firstCamera);
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      home: MyHomePage(),
-    ),
-  );
-}
-
 class TakePictureScreen extends StatefulWidget {
   const TakePictureScreen({
     Key? key,
@@ -216,27 +213,37 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          try {
-            await _initializeControllerFuture;
-            final image = await _controller.takePicture();
-            if (!mounted) return;
-            // Đợi 3 giây trước khi hiển thị hình ảnh
-            await Future.delayed(const Duration(seconds: 0));
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(
-                  imagePath: image.path,
+      floatingActionButton: Container(
+        margin: EdgeInsets.only(bottom: 30.0),
+        width: 70,
+        height: 70,
+        child: FloatingActionButton(
+          onPressed: () async {
+            try {
+              await _initializeControllerFuture;
+              final image = await _controller.takePicture();
+              if (!mounted) return;
+              // Đợi 3 giây trước khi hiển thị hình ảnh
+              await Future.delayed(const Duration(seconds: 0));
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => DisplayPictureScreen(
+                    imagePath: image.path,
+                  ),
                 ),
-              ),
-            );
-          } catch (e) {
-            print(e);
-          }
-        },
-        child: const Icon(Icons.add_a_photo),
+              );
+            } catch (e) {
+              print(e);
+            }
+            // Xử lý sự kiện khi nhấn nút floatingActionButton
+          },
+          child: Icon(Icons.photo_camera, size: 40),
+          backgroundColor: Colors.blue,
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+
     );
   }
 }
@@ -257,7 +264,7 @@ class DisplayPictureScreenState extends State<DisplayPictureScreen> {
   bool isQuan = false;
   bool isPhuKien = false;
   String _imageUrl = '';
-  bool _triggerReBuild = false;
+  var _triggerReBuild = 404;
   var image = Image(
     image: NetworkImage(
         'https://example.com/your_image.png'), // URL của ảnh từ internet
@@ -267,28 +274,35 @@ class DisplayPictureScreenState extends State<DisplayPictureScreen> {
   );
   @override
   void initState() {
+
     super.initState();
     _processImage();
-    print('đã xử lý xong hình ảnhhhhhhhhhhhhhhhhhhhh');
+
   }
 
   Future<void> _processImage() async {
     uploadImageNoAsync(File(widget.imagePath));
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 3));
     _imageUrl =
         'https://thienanbui0901.pythonanywhere.com/processed_images/processed_' +
             basename(widget.imagePath);
     //await Future.delayed(Duration(seconds: 2));
-    setState(() {
-      _triggerReBuild = true;
-    });
+    //var response = await http.head(Uri.parse('https://thienanbui0901.pythonanywhere.com/processed_images/processed_'));
+    var response = await http.head(Uri.parse(_imageUrl));
+    print(response.statusCode);
+    if (response.statusCode == 200)
+    {
+      setState(() {
+        _triggerReBuild = 200;
+      });
+    }
+
   }
 
   @override
   Widget build(BuildContext context) {
     print('build lạiiiiiiiiiiiiiiiiiiiiiiiiii');
-
-    if (_triggerReBuild == false) {
+    if (_triggerReBuild == 404) {
       return Scaffold(
         appBar: AppBar(title: const Text('Phân loại quần áo')),
         body: Center(
@@ -296,6 +310,7 @@ class DisplayPictureScreenState extends State<DisplayPictureScreen> {
         ),
       );
     } else {
+
       final size = MediaQuery.of(context).size;
       final aspectRatio = size.width / size.height;
       return Scaffold(
@@ -396,6 +411,7 @@ class DisplayPictureScreenState extends State<DisplayPictureScreen> {
       filename: basename(widget.imagePath),
     ));
     request.send();
+
   }
 
   Future<String?> uploadImage(File imageFile) async {
@@ -634,7 +650,7 @@ class _ExamplePageState extends State<ExamplePage> {
               },
             );
           }
-          if (!gameFinished && gameStarted) {
+          if (true) {
             setState(() {
               selectedValue = Fortune.randomInt(0, items.length);
               selected.add(selectedValue);
@@ -642,7 +658,8 @@ class _ExamplePageState extends State<ExamplePage> {
             });
 
             // Hiển thị thông báo sau khi quay kết thúc
-            Future.delayed(Duration(seconds: 8), () {
+            Future.delayed(Duration(seconds: 1), () {
+              /*
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -659,7 +676,7 @@ class _ExamplePageState extends State<ExamplePage> {
                     ],
                   );
                 },
-              );
+              );*/
             });
           }
         },
@@ -687,3 +704,18 @@ class _ExamplePageState extends State<ExamplePage> {
   }
 }
 
+Future<void> main() async {
+  HttpOverrides.global = MyHttpOverrides();
+  WidgetsFlutterBinding.ensureInitialized();
+  final cameras = await availableCameras();
+  createAppFolder();
+  firstCamera = cameras.first;
+  print(firstCamera);
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.from(colorScheme: ColorScheme.light().copyWith(primary: Colors.yellow[700])),
+      home: MyHomePage(),
+    ),
+  );
+}
